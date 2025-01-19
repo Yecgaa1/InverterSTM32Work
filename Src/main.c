@@ -94,7 +94,6 @@ int main(void)
   MX_DMA_Init();
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
-  MX_USART3_UART_Init();
   /* USER CODE BEGIN 2 */
     //UART3 is DCDC
     //UART1 is ACDC
@@ -106,9 +105,7 @@ int main(void)
     TJCScreenInit(&huart2);
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
     HAL_UART_Receive_DMA(&huart1, rec_ACDC, recLen_ACDC);
-    __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
-    HAL_UART_Receive_DMA(&huart3, rec_DCDC, recLen_DCDC);
-    HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
+     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
     while (1) {
     /* USER CODE END WHILE */
 

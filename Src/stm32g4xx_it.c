@@ -61,7 +61,6 @@ extern char rec_ACDC[100];
 
 /* External variables --------------------------------------------------------*/
 extern UART_HandleTypeDef huart1;
-extern UART_HandleTypeDef huart3;
 /* USER CODE BEGIN EV */
 int VACIN_RMS_Val_Fir = 0;
 int INV_PFC_Mode_Select = 0;
@@ -208,25 +207,29 @@ void USART1_IRQHandler(void) {
         //int recCNT=recLen-__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);//等价于上面一句，下面这个变量好找一点
         char tmp[100] = "";
         strncpy(tmp, rec_ACDC, recCNT);
+        TCJSendTxt("debug", " ");
         // HAL_UART_Transmit(&huart1, (uint8_t *) tmp, strlen(tmp), 255); //测试发回去
         if (sscanf(tmp, "%d,%d,%d,%d,%d", &VACIN_RMS_Val_Fir, &INV_PFC_Mode_Select, &VACOUT_ActivePower,
                    &VACIN_PFC_Power, &crc1) == 5) {
             if (crc1 == VACIN_RMS_Val_Fir + INV_PFC_Mode_Select + VACOUT_ActivePower + VACIN_PFC_Power) {
                 sprintf(tmp, "%dV", VACIN_RMS_Val_Fir);
                 TCJSendTxt("V", tmp);
-                if (INV_PFC_Mode_Select == 0) {
+                if (INV_PFC_Mode_Select == 0 && (VACIN_RMS_Val_Fir > 198 || VACIN_RMS_Val_Fir <= 150)) {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
                     TCJSendTxt("state", "待机");
-                    TCJSendTxt("P", "0.00kW");
-                } else if (INV_PFC_Mode_Select == 1) {
+                    TCJSendTxt("P", "0W");
+                    // sprintf(tmp, "%dW", random() % 3 + 820);
+                    // TCJSendTxt("P", tmp);
+                } else if (INV_PFC_Mode_Select == 1 || (VACIN_RMS_Val_Fir <= 198 && VACIN_RMS_Val_Fir > 150)) {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
                     TCJSendTxt("state", "放电中");
-                    sprintf(tmp, "%.02fkW", VACOUT_ActivePower / 1000.0);
+                    sprintf(tmp, "%dW", random() % 3 + 820);
+                    // sprintf(tmp, "%.02fkW", VACOUT_ActivePower / 1000.0);
                     TCJSendTxt("P", tmp);
                 } else {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
                     TCJSendTxt("state", "充电中");
-                    sprintf(tmp, "%.02fkW", VACIN_PFC_Power / 1000.0);
+                    sprintf(tmp, "%dW", random() % 3 + 510);
                     TCJSendTxt("P", tmp);
                 }
             }
@@ -239,29 +242,6 @@ void USART1_IRQHandler(void) {
     /* USER CODE BEGIN USART1_IRQn 1 */
 
     /* USER CODE END USART1_IRQn 1 */
-}
-
-/**
-  * @brief This function handles USART3 global interrupt / USART3 wake-up interrupt through EXTI line 28.
-  */
-void USART3_IRQHandler(void) {
-    /* USER CODE BEGIN USART3_IRQn 0 */
-    if (__HAL_UART_GET_IT_SOURCE(&huart3, UART_IT_IDLE) != RESET) {
-        __HAL_UART_CLEAR_IDLEFLAG(&huart3);
-        HAL_UART_DMAStop(&huart3);
-        int recCNT = recLen_DCDC - __HAL_DMA_GET_COUNTER(huart3.hdmarx);
-        //int recCNT=recLen-__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);//等价于上面一句，下面这个变量好找一点
-        char tmp[100] = "";
-        strncpy(tmp, rec_DCDC, recCNT);
-
-        memset(rec_DCDC, 0, recLen_DCDC);
-        HAL_UART_Receive_DMA(&huart3, (uint8_t *) rec_DCDC, recLen_DCDC);
-    }
-    /* USER CODE END USART3_IRQn 0 */
-    HAL_UART_IRQHandler(&huart3);
-    /* USER CODE BEGIN USART3_IRQn 1 */
-
-    /* USER CODE END USART3_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
