@@ -22,6 +22,8 @@
 #include "stm32g4xx_it.h"
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include <stdbool.h>
+
 #include "TJCScreen.h"
 #include "stdlib.h"
 /* USER CODE END Includes */
@@ -67,9 +69,82 @@ int VACIN_RMS_Val_Fir = 0;
 int INV_PFC_Mode_Select = 0;
 int VACOUT_ActivePower = 0;
 int VACIN_PFC_Power = 0;
+int ACDC_ErrorCode = 0;
 int crc1 = 0;
 int crc3 = 0;
 int SOC = 0;
+bool is_emergency_output = false;
+
+
+/**
+ * 解析系统保护标志，获取错误代码和简短描述
+ * @param errorCode 错误码，等于System_ProtectFlag_Info.all
+ * @param description 输出参数，用于存储错误描述
+ * @param descSize description缓冲区大小
+ * @return 错误代码(1-15)，如果无错误返回0
+ */
+int ACDC_DecodeSystemProtectFlag(unsigned short int errorCode, char* description, int descSize) {
+    // 检查是否有错误位被设置
+    if (errorCode == 0) {
+        snprintf(description, descSize, "无错误");
+        return 0;
+    }
+
+    // 定义错误描述数组
+    const char* errorDescriptions[] = {
+        "OLP",                   // 位 0 (0x0001)
+        "vBus过压",              // 位 1 (0x0002)
+        "vBus欠压",              // 位 2 (0x0004)
+        "AC输出过压",            // 位 3 (0x0008)
+        "AC输出欠压",            // 位 4 (0x0010)
+        "AC输出短路",            // 位 5 (0x0020)
+        "辅助电源过压",          // 位 6 (0x0040)
+        "辅助电源欠压",          // 位 7 (0x0080)
+        "过温保护",              // 位 8 (0x0100)
+        "负载过流",              // 位 9 (0x0200)
+        "电感过流",              // 位 10 (0x0400)
+        "系统初始化失败",        // 位 11 (0x0800)
+        "DCDC错误",              // 位 12 (0x1000)
+        "通信错误",              // 位 13 (0x2000)
+        "参考电压错误"           // 位 14 (0x4000)
+    };
+
+    // 查找第一个被设置的位(最低有效位)
+    int firstErrorBit = -1;
+    for (int i = 0; i < 15; i++) {
+        if (errorCode & (1 << i)) {
+            firstErrorBit = i;
+            break;
+        }
+    }
+
+    // 如果没有找到错误位，返回-1
+    if (firstErrorBit == -1) {
+        snprintf(description, descSize, "未知错误");
+        return -1;
+    }
+
+    // 计算有多少位被设置
+    int errorCount = 0;
+    for (int i = 0; i < 15; i++) {
+        if (errorCode & (1 << i)) {
+            errorCount++;
+        }
+    }
+
+    // 如果只有一个错误，只提供该错误的描述
+    if (errorCount == 1) {
+        snprintf(description, descSize, "%s", errorDescriptions[firstErrorBit]);
+    } else {
+        // 多个错误，提供主要错误和额外错误数量
+        snprintf(description, descSize, "%s +%d个错误",
+                 errorDescriptions[firstErrorBit], errorCount - 1);
+    }
+
+    // 返回错误代码(从1开始，所以位置+1)
+    return firstErrorBit + 1;
+}
+
 /* USER CODE END EV */
 
 /******************************************************************************/
@@ -219,33 +294,56 @@ void USART1_IRQHandler(void)
         __HAL_UART_CLEAR_IDLEFLAG(&huart1);
         HAL_UART_DMAStop(&huart1);
         int recCNT = recLen_ACDC - __HAL_DMA_GET_COUNTER(huart1.hdmarx);
-        //int recCNT=recLen-__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);//等价于上面一句，下面这个变量好找一点
-        char tmp[100] = "";
+        char tmp[100] = {0};
         strncpy(tmp, rec_ACDC, recCNT);
-        // TCJSendTxt("debug", tmp);
-        // HAL_UART_Transmit(&huart1, (uint8_t *) tmp, strlen(tmp), 255); //测试发回去
+        // TCJSendTxt("error", tmp);
+
+        //分离数据
         if (sscanf(tmp, "%d,%d,%d,%d,%d", &VACIN_RMS_Val_Fir, &INV_PFC_Mode_Select, &VACOUT_ActivePower,
-                   &VACIN_PFC_Power, &crc1) == 5) {
-            if (crc1 == VACIN_RMS_Val_Fir + INV_PFC_Mode_Select + VACOUT_ActivePower + VACIN_PFC_Power) {
+                   &VACIN_PFC_Power, &ACDC_ErrorCode, &crc1) == 6) {
+            //校验
+            if (crc1 == VACIN_RMS_Val_Fir + INV_PFC_Mode_Select + VACOUT_ActivePower + VACIN_PFC_Power +
+                ACDC_ErrorCode) {
+                //先是逆变器采集到的市电电压
                 sprintf(tmp, "%dV", VACIN_RMS_Val_Fir);
                 TCJSendTxt("V", tmp);
-                if (INV_PFC_Mode_Select == 0 && (VACIN_RMS_Val_Fir > 198 || VACIN_RMS_Val_Fir <= 150)) {
+
+                //根据模式区分显示内容
+                if (INV_PFC_Mode_Select == 0) //待机
+                {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
                     TCJSendTxt("state", "待机");
                     TCJSendTxt("P", "0W");
-                    // sprintf(tmp, "%dW", random() % 3 + 820);
-                    // TCJSendTxt("P", tmp);
-                } else if (INV_PFC_Mode_Select == 1 || (VACIN_RMS_Val_Fir <= 198 && VACIN_RMS_Val_Fir > 150)) {
+                } else if (INV_PFC_Mode_Select == 1) //放电
+                {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
-                    TCJSendTxt("state", "放电中");
-                    sprintf(tmp, "%dW", random() % 3 + 820);
-                    // sprintf(tmp, "%.02fkW", VACOUT_ActivePower / 1000.0);
+
+                    if (is_emergency_output) //应急放电
+                    {
+                        TCJSendTxt("state", "应急放电中");
+                    } else //正常并网放电
+                    {
+                        TCJSendTxt("state", "放电中");
+                    }
+
+                    sprintf(tmp, "%dW", VACOUT_ActivePower);
                     TCJSendTxt("P", tmp);
-                } else {
+                } else //充电
+                {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
                     TCJSendTxt("state", "充电中");
-                    sprintf(tmp, "%dW", random() % 3 + 510);
+                    sprintf(tmp, "%dW", VACIN_PFC_Power);
                     TCJSendTxt("P", tmp);
+                }
+
+                //解析错误代码
+                char description[100] = {0};
+                const int errorCode = ACDC_DecodeSystemProtectFlag(ACDC_ErrorCode, description, 100);
+                if (errorCode != 0) {
+                    sprintf(description, "error code %d", errorCode);
+                    TCJSendTxt("error", description);
+                } else {
+                    TCJSendTxt("error", "ok");
                 }
             }
         }
