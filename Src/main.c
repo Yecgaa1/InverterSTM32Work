@@ -19,6 +19,7 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "dma.h"
+#include "tim.h"
 #include "usart.h"
 #include "gpio.h"
 
@@ -60,6 +61,7 @@ int recLen_DCDC = 100;
 char rec_DCDC[100] = "";
 int recLen_ACDC = 100;
 char rec_ACDC[100] = "";
+char ErrorNote[64] = "";
 /* USER CODE END 0 */
 
 /**
@@ -95,6 +97,7 @@ int main(void)
   MX_USART1_UART_Init();
   MX_USART2_UART_Init();
   MX_USART3_UART_Init();
+  MX_TIM6_Init();
   /* USER CODE BEGIN 2 */
     //UART3 is DCDC
     //UART1 is ACDC

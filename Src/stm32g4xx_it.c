@@ -62,6 +62,7 @@ extern char rec_ACDC[100];
 /* USER CODE END 0 */
 
 /* External variables --------------------------------------------------------*/
+extern TIM_HandleTypeDef htim6;
 extern UART_HandleTypeDef huart1;
 extern UART_HandleTypeDef huart3;
 /* USER CODE BEGIN EV */
@@ -70,10 +71,81 @@ int INV_PFC_Mode_Select = 0;
 int VACOUT_ActivePower = 0;
 int VACIN_PFC_Power = 0;
 int ACDC_ErrorCode = 0;
+int DCDC_ErrorCode;
 int crc1 = 0;
 int crc3 = 0;
 int SOC = 0;
 bool is_emergency_output = false;
+extern char ErrorNote[64];
+/**
+ * 解析DCDC系统保护标志，获取错误代码和简短描述
+ * @param errorCode 错误码，等于System_Protect_Flag_BITS的所有位
+ * @param description 输出参数，用于存储错误描述
+ * @param descSize description缓冲区大小
+ * @return 错误代码(1-16)，如果无错误返回0
+ */
+int DCDC_DecodeSystemProtectFlag(unsigned short int errorCode, char *description, int descSize) {
+    // 检查是否有错误位被设置
+    if (errorCode == 0) {
+        snprintf(description, descSize, "无错误");
+        return 0;
+    }
+
+    // 定义错误描述数组
+    const char *DCDC_errorDescriptions[] = {
+        "过载", // 位 0 (0x0001) OLP
+        "vBus过压", // 位 1 (0x0002) vBus_OVP
+        "vBus欠压", // 位 2 (0x0004) vBus_LVP
+        "输出过压", // 位 3 (0x0008) RES_OVP
+        "输出欠压", // 位 4 (0x0010) RES_LVP
+        "参考电压错误", // 位 5 (0x0020) vref_ERR
+        "辅助电源过压", // 位 6 (0x0040) auxPower_OVP
+        "辅助电源欠压", // 位 7 (0x0080) auxPower_LVP
+        "过温保护", // 位 8 (0x0100) OTP
+        "电池充电过流", // 位 9 (0x0200) iBAT_CHG_OCP
+        "电池放电过流", // 位 10 (0x0400) iBAT_DISC_OCP
+        "电池过压", // 位 11 (0x0800) vBAT_OVP
+        "电池欠压", // 位 12 (0x1000) vBAT_LVP
+        "系统初始化失败", // 位 13 (0x2000) sys_Init_Fail
+        "ACDC错误", // 位 14 (0x4000) INV_ERR
+        "通信错误" // 位 15 (0x8000) communica_ERR
+    };
+
+    // 查找第一个被设置的位(最低有效位)
+    int firstErrorBit = -1;
+    for (int i = 0; i < 16; i++) {
+        if (errorCode & (1 << i)) {
+            firstErrorBit = i;
+            break;
+        }
+    }
+
+    // 如果没有找到错误位，返回-1
+    if (firstErrorBit == -1) {
+        snprintf(description, descSize, "未知错误");
+        return -1;
+    }
+
+    // 计算有多少位被设置
+    int errorCount = 0;
+    for (int i = 0; i < 16; i++) {
+        if (errorCode & (1 << i)) {
+            errorCount++;
+        }
+    }
+
+    // 如果只有一个错误，只提供该错误的描述
+    if (errorCount == 1) {
+        snprintf(description, descSize, "%s", DCDC_errorDescriptions[firstErrorBit]);
+    } else {
+        // 多个错误，提供主要错误和额外错误数量
+        snprintf(description, descSize, "%s +%d个错误",
+                 DCDC_errorDescriptions[firstErrorBit], errorCount - 1);
+    }
+
+    // 返回错误代码(从1开始，所以位置+1)
+    return firstErrorBit + 1;
+}
 
 /**
  * 解析系统保护标志，获取错误代码和简短描述
@@ -90,8 +162,8 @@ int ACDC_DecodeSystemProtectFlag(unsigned short int errorCode, char *description
     }
 
     // 定义错误描述数组
-    const char *errorDescriptions[] = {
-        "OLP", // 位 0 (0x0001)
+    const char *ACDC_errorDescriptions[] = {
+        "过载", // 位 0 (0x0001)
         "vBus过压", // 位 1 (0x0002)
         "vBus欠压", // 位 2 (0x0004)
         "AC输出过压", // 位 3 (0x0008)
@@ -133,11 +205,11 @@ int ACDC_DecodeSystemProtectFlag(unsigned short int errorCode, char *description
 
     // 如果只有一个错误，只提供该错误的描述
     if (errorCount == 1) {
-        snprintf(description, descSize, "%s", errorDescriptions[firstErrorBit]);
+        snprintf(description, descSize, "%s", ACDC_errorDescriptions[firstErrorBit]);
     } else {
         // 多个错误，提供主要错误和额外错误数量
         snprintf(description, descSize, "%s +%d个错误",
-                 errorDescriptions[firstErrorBit], errorCount - 1);
+                 ACDC_errorDescriptions[firstErrorBit], errorCount - 1);
     }
 
     // 返回错误代码(从1开始，所以位置+1)
@@ -152,128 +224,115 @@ int ACDC_DecodeSystemProtectFlag(unsigned short int errorCode, char *description
 /**
   * @brief This function handles Non maskable interrupt.
   */
-void NMI_Handler(void)
-{
-  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
+void NMI_Handler(void) {
+    /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
 
-  /* USER CODE END NonMaskableInt_IRQn 0 */
-  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+    /* USER CODE END NonMaskableInt_IRQn 0 */
+    /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
     while (1) {
     }
-  /* USER CODE END NonMaskableInt_IRQn 1 */
+    /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
 /**
   * @brief This function handles Hard fault interrupt.
   */
-void HardFault_Handler(void)
-{
-  /* USER CODE BEGIN HardFault_IRQn 0 */
+void HardFault_Handler(void) {
+    /* USER CODE BEGIN HardFault_IRQn 0 */
 
-  /* USER CODE END HardFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-    /* USER CODE END W1_HardFault_IRQn 0 */
-  }
+    /* USER CODE END HardFault_IRQn 0 */
+    while (1) {
+        /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+        /* USER CODE END W1_HardFault_IRQn 0 */
+    }
 }
 
 /**
   * @brief This function handles Memory management fault.
   */
-void MemManage_Handler(void)
-{
-  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
+void MemManage_Handler(void) {
+    /* USER CODE BEGIN MemoryManagement_IRQn 0 */
 
-  /* USER CODE END MemoryManagement_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
-    /* USER CODE END W1_MemoryManagement_IRQn 0 */
-  }
+    /* USER CODE END MemoryManagement_IRQn 0 */
+    while (1) {
+        /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+        /* USER CODE END W1_MemoryManagement_IRQn 0 */
+    }
 }
 
 /**
   * @brief This function handles Prefetch fault, memory access fault.
   */
-void BusFault_Handler(void)
-{
-  /* USER CODE BEGIN BusFault_IRQn 0 */
+void BusFault_Handler(void) {
+    /* USER CODE BEGIN BusFault_IRQn 0 */
 
-  /* USER CODE END BusFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_BusFault_IRQn 0 */
-    /* USER CODE END W1_BusFault_IRQn 0 */
-  }
+    /* USER CODE END BusFault_IRQn 0 */
+    while (1) {
+        /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+        /* USER CODE END W1_BusFault_IRQn 0 */
+    }
 }
 
 /**
   * @brief This function handles Undefined instruction or illegal state.
   */
-void UsageFault_Handler(void)
-{
-  /* USER CODE BEGIN UsageFault_IRQn 0 */
+void UsageFault_Handler(void) {
+    /* USER CODE BEGIN UsageFault_IRQn 0 */
 
-  /* USER CODE END UsageFault_IRQn 0 */
-  while (1)
-  {
-    /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
-    /* USER CODE END W1_UsageFault_IRQn 0 */
-  }
+    /* USER CODE END UsageFault_IRQn 0 */
+    while (1) {
+        /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+        /* USER CODE END W1_UsageFault_IRQn 0 */
+    }
 }
 
 /**
   * @brief This function handles System service call via SWI instruction.
   */
-void SVC_Handler(void)
-{
-  /* USER CODE BEGIN SVCall_IRQn 0 */
+void SVC_Handler(void) {
+    /* USER CODE BEGIN SVCall_IRQn 0 */
 
-  /* USER CODE END SVCall_IRQn 0 */
-  /* USER CODE BEGIN SVCall_IRQn 1 */
+    /* USER CODE END SVCall_IRQn 0 */
+    /* USER CODE BEGIN SVCall_IRQn 1 */
 
-  /* USER CODE END SVCall_IRQn 1 */
+    /* USER CODE END SVCall_IRQn 1 */
 }
 
 /**
   * @brief This function handles Debug monitor.
   */
-void DebugMon_Handler(void)
-{
-  /* USER CODE BEGIN DebugMonitor_IRQn 0 */
+void DebugMon_Handler(void) {
+    /* USER CODE BEGIN DebugMonitor_IRQn 0 */
 
-  /* USER CODE END DebugMonitor_IRQn 0 */
-  /* USER CODE BEGIN DebugMonitor_IRQn 1 */
+    /* USER CODE END DebugMonitor_IRQn 0 */
+    /* USER CODE BEGIN DebugMonitor_IRQn 1 */
 
-  /* USER CODE END DebugMonitor_IRQn 1 */
+    /* USER CODE END DebugMonitor_IRQn 1 */
 }
 
 /**
   * @brief This function handles Pendable request for system service.
   */
-void PendSV_Handler(void)
-{
-  /* USER CODE BEGIN PendSV_IRQn 0 */
+void PendSV_Handler(void) {
+    /* USER CODE BEGIN PendSV_IRQn 0 */
 
-  /* USER CODE END PendSV_IRQn 0 */
-  /* USER CODE BEGIN PendSV_IRQn 1 */
+    /* USER CODE END PendSV_IRQn 0 */
+    /* USER CODE BEGIN PendSV_IRQn 1 */
 
-  /* USER CODE END PendSV_IRQn 1 */
+    /* USER CODE END PendSV_IRQn 1 */
 }
 
 /**
   * @brief This function handles System tick timer.
   */
-void SysTick_Handler(void)
-{
-  /* USER CODE BEGIN SysTick_IRQn 0 */
+void SysTick_Handler(void) {
+    /* USER CODE BEGIN SysTick_IRQn 0 */
 
-  /* USER CODE END SysTick_IRQn 0 */
-  HAL_IncTick();
-  /* USER CODE BEGIN SysTick_IRQn 1 */
+    /* USER CODE END SysTick_IRQn 0 */
+    HAL_IncTick();
+    /* USER CODE BEGIN SysTick_IRQn 1 */
 
-  /* USER CODE END SysTick_IRQn 1 */
+    /* USER CODE END SysTick_IRQn 1 */
 }
 
 /******************************************************************************/
@@ -286,9 +345,8 @@ void SysTick_Handler(void)
 /**
   * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.
   */
-void USART1_IRQHandler(void)
-{
-  /* USER CODE BEGIN USART1_IRQn 0 */
+void USART1_IRQHandler(void) {
+    /* USER CODE BEGIN USART1_IRQn 0 */
     if (__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&huart1);
         HAL_UART_DMAStop(&huart1);
@@ -336,32 +394,32 @@ void USART1_IRQHandler(void)
                 }
 
                 //解析错误代码
-                char description[100] = {0};
+                char description[64] = {0};
                 const int errorCode = ACDC_DecodeSystemProtectFlag(ACDC_ErrorCode, description, 100);
-                if (errorCode != 0) {
-                    sprintf(description, "error code %d", errorCode);
-                    TCJSendTxt("error", description);
+                if (errorCode != 0 ) {
+                    if (errorCode != 13) {
+                        sprintf(ErrorNote, "%s", description);
+                    }
                 } else {
-                    TCJSendTxt("error", "ok");
+                    sprintf(ErrorNote, "正常运行");
                 }
             }
         }
         memset(rec_ACDC, 0, recLen_ACDC);
         HAL_UART_Receive_DMA(&huart1, (uint8_t *) rec_ACDC, recLen_ACDC);
     }
-  /* USER CODE END USART1_IRQn 0 */
-  HAL_UART_IRQHandler(&huart1);
-  /* USER CODE BEGIN USART1_IRQn 1 */
+    /* USER CODE END USART1_IRQn 0 */
+    HAL_UART_IRQHandler(&huart1);
+    /* USER CODE BEGIN USART1_IRQn 1 */
 
-  /* USER CODE END USART1_IRQn 1 */
+    /* USER CODE END USART1_IRQn 1 */
 }
 
 /**
   * @brief This function handles USART3 global interrupt / USART3 wake-up interrupt through EXTI line 28.
   */
-void USART3_IRQHandler(void)
-{
-  /* USER CODE BEGIN USART3_IRQn 0 */
+void USART3_IRQHandler(void) {
+    /* USER CODE BEGIN USART3_IRQn 0 */
     if (__HAL_UART_GET_IT_SOURCE(&huart3, UART_IT_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&huart3);
         HAL_UART_DMAStop(&huart3);
@@ -369,20 +427,45 @@ void USART3_IRQHandler(void)
         //int recCNT=recLen-__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);//等价于上面一句，下面这个变量好找一点
         char tmp[100] = "";
         strncpy(tmp, rec_DCDC, recCNT);
-        if (sscanf(tmp, "%d,%d", &SOC, &crc3) == 2) {
-            if (SOC + 1 == crc3) {
+        if (sscanf(tmp, "%d,%d", &SOC, &DCDC_ErrorCode, &crc3) == 2) {
+            if (SOC + DCDC_ErrorCode == crc3) {
+                //开始解析
                 sprintf(tmp, "%d%%", SOC);
                 TCJSendTxt("soc", tmp);
+
+                //解析错误代码
+                char description[64] = {0};
+                const int errorCode = DCDC_DecodeSystemProtectFlag(DCDC_ErrorCode, description, 100);
+                if (errorCode != 0) {
+                    if (errorCode != 15) {
+                        sprintf(ErrorNote, "%s", description);
+                    }
+                } else {
+                    sprintf(ErrorNote, "正常运行");
+                }
             }
         }
         memset(rec_DCDC, 0, recLen_DCDC);
         HAL_UART_Receive_DMA(&huart3, (uint8_t *) rec_DCDC, recLen_DCDC);
     }
-  /* USER CODE END USART3_IRQn 0 */
-  HAL_UART_IRQHandler(&huart3);
-  /* USER CODE BEGIN USART3_IRQn 1 */
+    /* USER CODE END USART3_IRQn 0 */
+    HAL_UART_IRQHandler(&huart3);
+    /* USER CODE BEGIN USART3_IRQn 1 */
 
-  /* USER CODE END USART3_IRQn 1 */
+    /* USER CODE END USART3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles TIM6 global interrupt, DAC1 and DAC3 channel underrun error interrupts.
+  */
+void TIM6_DAC_IRQHandler(void) {
+    /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+
+    /* USER CODE END TIM6_DAC_IRQn 0 */
+    HAL_TIM_IRQHandler(&htim6);
+    /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
+
+    /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
