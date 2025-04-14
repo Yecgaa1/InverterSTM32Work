@@ -75,7 +75,6 @@ int crc3 = 0;
 int SOC = 0;
 bool is_emergency_output = false;
 
-
 /**
  * 解析系统保护标志，获取错误代码和简短描述
  * @param errorCode 错误码，等于System_ProtectFlag_Info.all
@@ -83,7 +82,7 @@ bool is_emergency_output = false;
  * @param descSize description缓冲区大小
  * @return 错误代码(1-15)，如果无错误返回0
  */
-int ACDC_DecodeSystemProtectFlag(unsigned short int errorCode, char* description, int descSize) {
+int ACDC_DecodeSystemProtectFlag(unsigned short int errorCode, char *description, int descSize) {
     // 检查是否有错误位被设置
     if (errorCode == 0) {
         snprintf(description, descSize, "无错误");
@@ -91,22 +90,22 @@ int ACDC_DecodeSystemProtectFlag(unsigned short int errorCode, char* description
     }
 
     // 定义错误描述数组
-    const char* errorDescriptions[] = {
-        "OLP",                   // 位 0 (0x0001)
-        "vBus过压",              // 位 1 (0x0002)
-        "vBus欠压",              // 位 2 (0x0004)
-        "AC输出过压",            // 位 3 (0x0008)
-        "AC输出欠压",            // 位 4 (0x0010)
-        "AC输出短路",            // 位 5 (0x0020)
-        "辅助电源过压",          // 位 6 (0x0040)
-        "辅助电源欠压",          // 位 7 (0x0080)
-        "过温保护",              // 位 8 (0x0100)
-        "负载过流",              // 位 9 (0x0200)
-        "电感过流",              // 位 10 (0x0400)
-        "系统初始化失败",        // 位 11 (0x0800)
-        "DCDC错误",              // 位 12 (0x1000)
-        "通信错误",              // 位 13 (0x2000)
-        "参考电压错误"           // 位 14 (0x4000)
+    const char *errorDescriptions[] = {
+        "OLP", // 位 0 (0x0001)
+        "vBus过压", // 位 1 (0x0002)
+        "vBus欠压", // 位 2 (0x0004)
+        "AC输出过压", // 位 3 (0x0008)
+        "AC输出欠压", // 位 4 (0x0010)
+        "AC输出短路", // 位 5 (0x0020)
+        "辅助电源过压", // 位 6 (0x0040)
+        "辅助电源欠压", // 位 7 (0x0080)
+        "过温保护", // 位 8 (0x0100)
+        "负载过流", // 位 9 (0x0200)
+        "电感过流", // 位 10 (0x0400)
+        "系统初始化失败", // 位 11 (0x0800)
+        "DCDC错误", // 位 12 (0x1000)
+        "通信错误", // 位 13 (0x2000)
+        "参考电压错误" // 位 14 (0x4000)
     };
 
     // 查找第一个被设置的位(最低有效位)
@@ -299,7 +298,7 @@ void USART1_IRQHandler(void)
         // TCJSendTxt("error", tmp);
 
         //分离数据
-        if (sscanf(tmp, "%d,%d,%d,%d,%d", &VACIN_RMS_Val_Fir, &INV_PFC_Mode_Select, &VACOUT_ActivePower,
+        if (sscanf(tmp, "%d,%d,%d,%d,%d,%d", &VACIN_RMS_Val_Fir, &INV_PFC_Mode_Select, &VACOUT_ActivePower,
                    &VACIN_PFC_Power, &ACDC_ErrorCode, &crc1) == 6) {
             //校验
             if (crc1 == VACIN_RMS_Val_Fir + INV_PFC_Mode_Select + VACOUT_ActivePower + VACIN_PFC_Power +
@@ -370,7 +369,12 @@ void USART3_IRQHandler(void)
         //int recCNT=recLen-__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);//等价于上面一句，下面这个变量好找一点
         char tmp[100] = "";
         strncpy(tmp, rec_DCDC, recCNT);
-        TCJSendTxt("debug", tmp);
+        if (sscanf(tmp, "%d,%d", &SOC, &crc3) == 2) {
+            if (SOC + 1 == crc3) {
+                sprintf(tmp, "%d%%", SOC);
+                TCJSendTxt("soc", tmp);
+            }
+        }
         memset(rec_DCDC, 0, recLen_DCDC);
         HAL_UART_Receive_DMA(&huart3, (uint8_t *) rec_DCDC, recLen_DCDC);
     }
