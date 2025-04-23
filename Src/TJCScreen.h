@@ -10,14 +10,14 @@
 #include "stdio.h"
 void TJCScreenInit(UART_HandleTypeDef *huart);
 
-void TCJSendEnd();
+void TJCSendEnd();
 
-void TCJSendValue(char *name, int value);
+void TJCSendValue(char *name, int value);
 
-void TCJSendTxt(char *name, char *value);
+void TJCSendTxt(char *name, char *value);
 
-void TCJSendAnyProperty(char *object_name, char *property, char *value);
+void TJCSendAnyProperty(char *object_name, char *property, char *value);
 
-void TCJSendAny(char *any);
+void TJCSendAny(char *any);
 
 #endif //F407ZGT6_LEDTEST_SRC_TJCSCREEN_H_

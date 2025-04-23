@@ -34,6 +34,7 @@ extern int recLen_DCDC;
 extern char rec_DCDC[100];
 extern int recLen_ACDC;
 extern char rec_ACDC[100];
+extern uint8_t initing_DCDC, initing_ACDC;
 /* USER CODE END TD */
 
 /* Private define ------------------------------------------------------------*/
@@ -356,11 +357,82 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 /**
+  * @brief This function handles EXTI line1 interrupt.
+  */
+void EXTI1_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI1_IRQn 0 */
+
+  /* USER CODE END EXTI1_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button1_Pin);
+  /* USER CODE BEGIN EXTI1_IRQn 1 */
+
+  /* USER CODE END EXTI1_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line2 interrupt.
+  */
+void EXTI2_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_IRQn 0 */
+
+  /* USER CODE END EXTI2_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button2_Pin);
+  /* USER CODE BEGIN EXTI2_IRQn 1 */
+
+  /* USER CODE END EXTI2_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line3 interrupt.
+  */
+void EXTI3_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI3_IRQn 0 */
+
+  /* USER CODE END EXTI3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button3_Pin);
+  /* USER CODE BEGIN EXTI3_IRQn 1 */
+
+  /* USER CODE END EXTI3_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line4 interrupt.
+  */
+void EXTI4_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI4_IRQn 0 */
+
+  /* USER CODE END EXTI4_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button4_Pin);
+  /* USER CODE BEGIN EXTI4_IRQn 1 */
+
+  /* USER CODE END EXTI4_IRQn 1 */
+}
+
+/**
+  * @brief This function handles EXTI line[9:5] interrupts.
+  */
+void EXTI9_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+
+  /* USER CODE END EXTI9_5_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button5_Pin);
+  /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+
+  /* USER CODE END EXTI9_5_IRQn 1 */
+}
+
+/**
   * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.
   */
 void USART1_IRQHandler(void)
 {
   /* USER CODE BEGIN USART1_IRQn 0 */
+    //ACDC侧
     if (__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&huart1);
         HAL_UART_DMAStop(&huart1);
@@ -375,42 +447,45 @@ void USART1_IRQHandler(void)
             //校验
             if (crc1 == VACIN_RMS_Val_Fir + INV_PFC_Mode_Select + VACOUT_ActivePower + VACIN_PFC_Power +
                 ACDC_ErrorCode) {
+                if (initing_ACDC) {
+                    initing_ACDC = 0;
+                }
                 //先是逆变器采集到的市电电压
                 sprintf(tmp, "%dV", VACIN_RMS_Val_Fir);
-                TCJSendTxt("V", tmp);
+                TJCSendTxt("V", tmp);
 
                 //根据模式区分显示内容
                 if (INV_PFC_Mode_Select == 0) //待机
                 {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_RESET);
-                    TCJSendTxt("state", "待机");
-                    TCJSendTxt("P", "0W");
+                    TJCSendTxt("state", "待机");
+                    TJCSendTxt("P", "0W");
                 } else if (INV_PFC_Mode_Select == 1) //放电
                 {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
 
                     if (is_emergency_output) //应急放电
                     {
-                        TCJSendTxt("state", "应急放电中");
+                        TJCSendTxt("state", "应急放电中");
                     } else //正常并网放电
                     {
-                        TCJSendTxt("state", "放电中");
+                        TJCSendTxt("state", "放电中");
                     }
 
                     sprintf(tmp, "%dW", VACOUT_ActivePower);
-                    TCJSendTxt("P", tmp);
+                    TJCSendTxt("P", tmp);
                 } else //充电
                 {
                     HAL_GPIO_WritePin(GPIOC, GPIO_PIN_0, GPIO_PIN_SET);
-                    TCJSendTxt("state", "充电中");
+                    TJCSendTxt("state", "充电中");
                     sprintf(tmp, "%dW", VACIN_PFC_Power);
-                    TCJSendTxt("P", tmp);
+                    TJCSendTxt("P", tmp);
                 }
 
                 //解析错误代码
                 char description[64] = {0};
                 const int errorCode = ACDC_DecodeSystemProtectFlag(ACDC_ErrorCode, description, 100);
-                if (errorCode != 0 ) {
+                if (errorCode != 0) {
                     if (errorCode != 13) {
                         sprintf(ErrorNote, "%s", description);
                     }
@@ -435,6 +510,7 @@ void USART1_IRQHandler(void)
 void USART3_IRQHandler(void)
 {
   /* USER CODE BEGIN USART3_IRQn 0 */
+    //DCDC侧
     if (__HAL_UART_GET_IT_SOURCE(&huart3, UART_IT_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&huart3);
         HAL_UART_DMAStop(&huart3);
@@ -445,8 +521,11 @@ void USART3_IRQHandler(void)
         if (sscanf(tmp, "%d,%d", &SOC, &DCDC_ErrorCode, &crc3) == 2) {
             if (SOC + DCDC_ErrorCode == crc3) {
                 //开始解析
+                if (initing_DCDC) {
+                    initing_DCDC = 0;
+                }
                 sprintf(tmp, "%d%%", SOC);
-                TCJSendTxt("soc", tmp);
+                TJCSendTxt("soc", tmp);
 
                 //解析错误代码
                 char description[64] = {0};
