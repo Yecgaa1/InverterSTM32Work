@@ -119,22 +119,22 @@ int main(void)
     TJCScreenInit(&huart2);
     HAL_Delay(100);
 
-    // HAL_ADCEx_Calibration_Start(&hadc2,ADC_SINGLE_ENDED);
-    // HAL_ADC_Start_DMA(&hadc2, (uint32_t *) &adc_buffer, 1024);
-    // __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
-    // HAL_UART_Receive_DMA(&huart1, rec_ACDC, recLen_ACDC);
-    // __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
-    // HAL_UART_Receive_DMA(&huart3, rec_DCDC, recLen_DCDC);
+    HAL_ADCEx_Calibration_Start(&hadc2,ADC_SINGLE_ENDED);
+    HAL_ADC_Start_DMA(&hadc2, (uint32_t *) &adc_buffer, 1024);
+    __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
+    HAL_UART_Receive_DMA(&huart1, rec_ACDC, recLen_ACDC);
+    __HAL_UART_ENABLE_IT(&huart3, UART_IT_IDLE);
+    HAL_UART_Receive_DMA(&huart3, rec_DCDC, recLen_DCDC);
 
     //执行初始化。
     //开机
     HAL_GPIO_WritePin(POWERON_SWITCH_GPIO_Port,POWERON_SWITCH_Pin, GPIO_PIN_SET);
     HAL_Delay(4000);
     HAL_GPIO_WritePin(POWERON_SWITCH_GPIO_Port,POWERON_SWITCH_Pin, GPIO_PIN_RESET);
-    // TJCSendTxt("error", "等待逆变器响应");
-    TJCSendTxt("soc", "123");
-    // while (initing_ACDC || initing_DCDC) {
-    // }
+    TJCSendTxt("error", "等待逆变器响应");
+    // TJCSendTxt("soc", "123");
+    while (initing_ACDC || initing_DCDC) {
+    }
 
     float now_v = GetAC_V();
     if (now_v < 100) {
@@ -175,7 +175,7 @@ void SystemClock_Config(void)
   {
   }
 
-  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_2, 85, LL_RCC_PLLR_DIV_2);
+  LL_RCC_PLL_ConfigDomain_SYS(LL_RCC_PLLSOURCE_HSE, LL_RCC_PLLM_DIV_3, 85, LL_RCC_PLLR_DIV_2);
   LL_RCC_PLL_EnableDomain_SYS();
   LL_RCC_PLL_Enable();
    /* Wait till PLL is ready */
@@ -232,7 +232,7 @@ float GetAC_V() {
         endIdx = zeroCrossings[2];
         length = endIdx - startIdx;
 
-        // arm_rms_f32(&rms_buffer[startIdx], length, &rms_303);
+        arm_rms_f32(&rms_buffer[startIdx], length, &rms_303);
     } else {
         rms_303 = 0;
     }
