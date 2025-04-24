@@ -20,4 +20,6 @@ void TJCSendAnyProperty(char *object_name, char *property, char *value);
 
 void TJCSendAny(char *any);
 
+void TJCSendTxtWithFloat(char *name, float value);
+
 #endif //F407ZGT6_LEDTEST_SRC_TJCSCREEN_H_

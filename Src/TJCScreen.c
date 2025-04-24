@@ -42,3 +42,9 @@ void TJCSendAny(char *any) {
     HAL_UART_Transmit(gHuart, (uint8_t *) any, strlen(any), 0xffff);
     TJCSendEnd();
 }
+void TJCSendTxtWithFloat(char *name, const float value) {
+    char tmp[30]={0};
+    sprintf(tmp, "%s.txt=\"%.02f\"", name, value);
+    HAL_UART_Transmit(gHuart, (uint8_t *) tmp, strlen(tmp), 0xffff);
+    TJCSendEnd();
+}
