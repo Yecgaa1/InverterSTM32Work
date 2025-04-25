@@ -66,7 +66,7 @@ int recLen_ACDC = 100;
 char rec_ACDC[100] = "";
 char ErrorNote[64] = "";
 uint8_t isHighLight = 1;
-uint8_t WantWorkState = 1;
+uint8_t WantWorkState = 0;
 uint8_t isError = 0;
 uint8_t WorkState = 0; //0初始化中 1待机 2治理 3应急 4错误
 volatile uint8_t initing_DCDC = 1, initing_ACDC = 1;
