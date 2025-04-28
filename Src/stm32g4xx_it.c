@@ -490,7 +490,7 @@ void USART3_IRQHandler(void) {
         //int recCNT=recLen-__HAL_DMA_GET_COUNTER(&hdma_usart1_rx);//等价于上面一句，下面这个变量好找一点
         char tmp[100] = "";
         strncpy(tmp, rec_DCDC, recCNT);
-        if (sscanf(tmp, "%d,%d", &SOC, &DCDC_ErrorCode, &crc3) == 2) {
+        if (sscanf(tmp, "%d,%d,%d", &SOC, &DCDC_ErrorCode, &crc3) == 3) {
             if (SOC + DCDC_ErrorCode == crc3) {
                 //开始解析
                 if (initing_DCDC) {
