@@ -227,115 +227,128 @@ int ACDC_DecodeSystemProtectFlag(unsigned short int errorCode, char *description
 /**
   * @brief This function handles Non maskable interrupt.
   */
-void NMI_Handler(void) {
-    /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
+void NMI_Handler(void)
+{
+  /* USER CODE BEGIN NonMaskableInt_IRQn 0 */
 
-    /* USER CODE END NonMaskableInt_IRQn 0 */
-    /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
+  /* USER CODE END NonMaskableInt_IRQn 0 */
+  /* USER CODE BEGIN NonMaskableInt_IRQn 1 */
     while (1) {
     }
-    /* USER CODE END NonMaskableInt_IRQn 1 */
+  /* USER CODE END NonMaskableInt_IRQn 1 */
 }
 
 /**
   * @brief This function handles Hard fault interrupt.
   */
-void HardFault_Handler(void) {
-    /* USER CODE BEGIN HardFault_IRQn 0 */
+void HardFault_Handler(void)
+{
+  /* USER CODE BEGIN HardFault_IRQn 0 */
 
-    /* USER CODE END HardFault_IRQn 0 */
-    while (1) {
-        /* USER CODE BEGIN W1_HardFault_IRQn 0 */
-        /* USER CODE END W1_HardFault_IRQn 0 */
-    }
+  /* USER CODE END HardFault_IRQn 0 */
+  while (1)
+  {
+    /* USER CODE BEGIN W1_HardFault_IRQn 0 */
+    /* USER CODE END W1_HardFault_IRQn 0 */
+  }
 }
 
 /**
   * @brief This function handles Memory management fault.
   */
-void MemManage_Handler(void) {
-    /* USER CODE BEGIN MemoryManagement_IRQn 0 */
+void MemManage_Handler(void)
+{
+  /* USER CODE BEGIN MemoryManagement_IRQn 0 */
 
-    /* USER CODE END MemoryManagement_IRQn 0 */
-    while (1) {
-        /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
-        /* USER CODE END W1_MemoryManagement_IRQn 0 */
-    }
+  /* USER CODE END MemoryManagement_IRQn 0 */
+  while (1)
+  {
+    /* USER CODE BEGIN W1_MemoryManagement_IRQn 0 */
+    /* USER CODE END W1_MemoryManagement_IRQn 0 */
+  }
 }
 
 /**
   * @brief This function handles Prefetch fault, memory access fault.
   */
-void BusFault_Handler(void) {
-    /* USER CODE BEGIN BusFault_IRQn 0 */
+void BusFault_Handler(void)
+{
+  /* USER CODE BEGIN BusFault_IRQn 0 */
 
-    /* USER CODE END BusFault_IRQn 0 */
-    while (1) {
-        /* USER CODE BEGIN W1_BusFault_IRQn 0 */
-        /* USER CODE END W1_BusFault_IRQn 0 */
-    }
+  /* USER CODE END BusFault_IRQn 0 */
+  while (1)
+  {
+    /* USER CODE BEGIN W1_BusFault_IRQn 0 */
+    /* USER CODE END W1_BusFault_IRQn 0 */
+  }
 }
 
 /**
   * @brief This function handles Undefined instruction or illegal state.
   */
-void UsageFault_Handler(void) {
-    /* USER CODE BEGIN UsageFault_IRQn 0 */
+void UsageFault_Handler(void)
+{
+  /* USER CODE BEGIN UsageFault_IRQn 0 */
 
-    /* USER CODE END UsageFault_IRQn 0 */
-    while (1) {
-        /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
-        /* USER CODE END W1_UsageFault_IRQn 0 */
-    }
+  /* USER CODE END UsageFault_IRQn 0 */
+  while (1)
+  {
+    /* USER CODE BEGIN W1_UsageFault_IRQn 0 */
+    /* USER CODE END W1_UsageFault_IRQn 0 */
+  }
 }
 
 /**
   * @brief This function handles System service call via SWI instruction.
   */
-void SVC_Handler(void) {
-    /* USER CODE BEGIN SVCall_IRQn 0 */
+void SVC_Handler(void)
+{
+  /* USER CODE BEGIN SVCall_IRQn 0 */
 
-    /* USER CODE END SVCall_IRQn 0 */
-    /* USER CODE BEGIN SVCall_IRQn 1 */
+  /* USER CODE END SVCall_IRQn 0 */
+  /* USER CODE BEGIN SVCall_IRQn 1 */
 
-    /* USER CODE END SVCall_IRQn 1 */
+  /* USER CODE END SVCall_IRQn 1 */
 }
 
 /**
   * @brief This function handles Debug monitor.
   */
-void DebugMon_Handler(void) {
-    /* USER CODE BEGIN DebugMonitor_IRQn 0 */
+void DebugMon_Handler(void)
+{
+  /* USER CODE BEGIN DebugMonitor_IRQn 0 */
 
-    /* USER CODE END DebugMonitor_IRQn 0 */
-    /* USER CODE BEGIN DebugMonitor_IRQn 1 */
+  /* USER CODE END DebugMonitor_IRQn 0 */
+  /* USER CODE BEGIN DebugMonitor_IRQn 1 */
 
-    /* USER CODE END DebugMonitor_IRQn 1 */
+  /* USER CODE END DebugMonitor_IRQn 1 */
 }
 
 /**
   * @brief This function handles Pendable request for system service.
   */
-void PendSV_Handler(void) {
-    /* USER CODE BEGIN PendSV_IRQn 0 */
+void PendSV_Handler(void)
+{
+  /* USER CODE BEGIN PendSV_IRQn 0 */
 
-    /* USER CODE END PendSV_IRQn 0 */
-    /* USER CODE BEGIN PendSV_IRQn 1 */
+  /* USER CODE END PendSV_IRQn 0 */
+  /* USER CODE BEGIN PendSV_IRQn 1 */
 
-    /* USER CODE END PendSV_IRQn 1 */
+  /* USER CODE END PendSV_IRQn 1 */
 }
 
 /**
   * @brief This function handles System tick timer.
   */
-void SysTick_Handler(void) {
-    /* USER CODE BEGIN SysTick_IRQn 0 */
+void SysTick_Handler(void)
+{
+  /* USER CODE BEGIN SysTick_IRQn 0 */
 
-    /* USER CODE END SysTick_IRQn 0 */
-    HAL_IncTick();
-    /* USER CODE BEGIN SysTick_IRQn 1 */
+  /* USER CODE END SysTick_IRQn 0 */
+  HAL_IncTick();
+  /* USER CODE BEGIN SysTick_IRQn 1 */
 
-    /* USER CODE END SysTick_IRQn 1 */
+  /* USER CODE END SysTick_IRQn 1 */
 }
 
 /******************************************************************************/
@@ -348,73 +361,79 @@ void SysTick_Handler(void) {
 /**
   * @brief This function handles EXTI line1 interrupt.
   */
-void EXTI1_IRQHandler(void) {
-    /* USER CODE BEGIN EXTI1_IRQn 0 */
+void EXTI1_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI1_IRQn 0 */
 
-    /* USER CODE END EXTI1_IRQn 0 */
-    HAL_GPIO_EXTI_IRQHandler(Button1_Pin);
-    /* USER CODE BEGIN EXTI1_IRQn 1 */
+  /* USER CODE END EXTI1_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button1_Pin);
+  /* USER CODE BEGIN EXTI1_IRQn 1 */
 
-    /* USER CODE END EXTI1_IRQn 1 */
+  /* USER CODE END EXTI1_IRQn 1 */
 }
 
 /**
   * @brief This function handles EXTI line2 interrupt.
   */
-void EXTI2_IRQHandler(void) {
-    /* USER CODE BEGIN EXTI2_IRQn 0 */
+void EXTI2_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI2_IRQn 0 */
 
-    /* USER CODE END EXTI2_IRQn 0 */
-    HAL_GPIO_EXTI_IRQHandler(Button2_Pin);
-    /* USER CODE BEGIN EXTI2_IRQn 1 */
+  /* USER CODE END EXTI2_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button2_Pin);
+  /* USER CODE BEGIN EXTI2_IRQn 1 */
 
-    /* USER CODE END EXTI2_IRQn 1 */
+  /* USER CODE END EXTI2_IRQn 1 */
 }
 
 /**
   * @brief This function handles EXTI line3 interrupt.
   */
-void EXTI3_IRQHandler(void) {
-    /* USER CODE BEGIN EXTI3_IRQn 0 */
+void EXTI3_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI3_IRQn 0 */
 
-    /* USER CODE END EXTI3_IRQn 0 */
-    HAL_GPIO_EXTI_IRQHandler(Button3_Pin);
-    /* USER CODE BEGIN EXTI3_IRQn 1 */
+  /* USER CODE END EXTI3_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button3_Pin);
+  /* USER CODE BEGIN EXTI3_IRQn 1 */
 
-    /* USER CODE END EXTI3_IRQn 1 */
+  /* USER CODE END EXTI3_IRQn 1 */
 }
 
 /**
   * @brief This function handles EXTI line4 interrupt.
   */
-void EXTI4_IRQHandler(void) {
-    /* USER CODE BEGIN EXTI4_IRQn 0 */
+void EXTI4_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI4_IRQn 0 */
 
-    /* USER CODE END EXTI4_IRQn 0 */
-    HAL_GPIO_EXTI_IRQHandler(Button4_Pin);
-    /* USER CODE BEGIN EXTI4_IRQn 1 */
+  /* USER CODE END EXTI4_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button4_Pin);
+  /* USER CODE BEGIN EXTI4_IRQn 1 */
 
-    /* USER CODE END EXTI4_IRQn 1 */
+  /* USER CODE END EXTI4_IRQn 1 */
 }
 
 /**
   * @brief This function handles EXTI line[9:5] interrupts.
   */
-void EXTI9_5_IRQHandler(void) {
-    /* USER CODE BEGIN EXTI9_5_IRQn 0 */
+void EXTI9_5_IRQHandler(void)
+{
+  /* USER CODE BEGIN EXTI9_5_IRQn 0 */
 
-    /* USER CODE END EXTI9_5_IRQn 0 */
-    HAL_GPIO_EXTI_IRQHandler(Button5_Pin);
-    /* USER CODE BEGIN EXTI9_5_IRQn 1 */
+  /* USER CODE END EXTI9_5_IRQn 0 */
+  HAL_GPIO_EXTI_IRQHandler(Button5_Pin);
+  /* USER CODE BEGIN EXTI9_5_IRQn 1 */
 
-    /* USER CODE END EXTI9_5_IRQn 1 */
+  /* USER CODE END EXTI9_5_IRQn 1 */
 }
 
 /**
   * @brief This function handles USART1 global interrupt / USART1 wake-up interrupt through EXTI line 25.
   */
-void USART1_IRQHandler(void) {
-    /* USER CODE BEGIN USART1_IRQn 0 */
+void USART1_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART1_IRQn 0 */
     //ACDC侧
     if (__HAL_UART_GET_IT_SOURCE(&huart1, UART_IT_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&huart1);
@@ -435,7 +454,7 @@ void USART1_IRQHandler(void) {
                 }
                 //先是逆变器采集到的市电电压
                 sprintf(tmp, "%dV", VACIN_RMS_Val_Fir);
-                TJCSendTxt("V", tmp);
+                // TJCSendTxt("V", tmp);
 
                 //根据模式区分显示内容
                 if (INV_PFC_Mode_Select == 0) //待机
@@ -458,8 +477,8 @@ void USART1_IRQHandler(void) {
                     if (errorCode != 13) {
                         sprintf(ErrorNote, "%s", description);
                         WantWorkState = WorkState = 4;
-                        TJCSendTxt("state", "故障");
-                        TJCSendTxt("error", ErrorNote);
+                        // TJCSendTxt("state", "故障");
+                        // TJCSendTxt("error", ErrorNote);
                         HAL_GPIO_WritePin(AC_OUTPUT_CTRL_GPIO_Port, AC_OUTPUT_CTRL_Pin, GPIO_PIN_RESET); //关闭市电输出
                     }
                 } else {
@@ -470,18 +489,19 @@ void USART1_IRQHandler(void) {
         memset(rec_ACDC, 0, recLen_ACDC);
         HAL_UART_Receive_DMA(&huart1, (uint8_t *) rec_ACDC, recLen_ACDC);
     }
-    /* USER CODE END USART1_IRQn 0 */
-    HAL_UART_IRQHandler(&huart1);
-    /* USER CODE BEGIN USART1_IRQn 1 */
+  /* USER CODE END USART1_IRQn 0 */
+  HAL_UART_IRQHandler(&huart1);
+  /* USER CODE BEGIN USART1_IRQn 1 */
 
-    /* USER CODE END USART1_IRQn 1 */
+  /* USER CODE END USART1_IRQn 1 */
 }
 
 /**
   * @brief This function handles USART3 global interrupt / USART3 wake-up interrupt through EXTI line 28.
   */
-void USART3_IRQHandler(void) {
-    /* USER CODE BEGIN USART3_IRQn 0 */
+void USART3_IRQHandler(void)
+{
+  /* USER CODE BEGIN USART3_IRQn 0 */
     //DCDC侧
     if (__HAL_UART_GET_IT_SOURCE(&huart3, UART_IT_IDLE) != RESET) {
         __HAL_UART_CLEAR_IDLEFLAG(&huart3);
@@ -504,8 +524,8 @@ void USART3_IRQHandler(void) {
                     if (errorCode != 15) {
                         sprintf(ErrorNote, "%s", description);
                         WantWorkState = WorkState = 4;
-                        TJCSendTxt("state", "故障");
-                        TJCSendTxt("error", ErrorNote);
+                        // TJCSendTxt("state", "故障");
+                        // TJCSendTxt("error", ErrorNote);
                         HAL_GPIO_WritePin(AC_OUTPUT_CTRL_GPIO_Port, AC_OUTPUT_CTRL_Pin, GPIO_PIN_RESET); //关闭市电输出
                     }
                 } else {
@@ -516,24 +536,25 @@ void USART3_IRQHandler(void) {
         memset(rec_DCDC, 0, recLen_DCDC);
         HAL_UART_Receive_DMA(&huart3, (uint8_t *) rec_DCDC, recLen_DCDC);
     }
-    /* USER CODE END USART3_IRQn 0 */
-    HAL_UART_IRQHandler(&huart3);
-    /* USER CODE BEGIN USART3_IRQn 1 */
+  /* USER CODE END USART3_IRQn 0 */
+  HAL_UART_IRQHandler(&huart3);
+  /* USER CODE BEGIN USART3_IRQn 1 */
 
-    /* USER CODE END USART3_IRQn 1 */
+  /* USER CODE END USART3_IRQn 1 */
 }
 
 /**
   * @brief This function handles TIM6 global interrupt, DAC1 and DAC3 channel underrun error interrupts.
   */
-void TIM6_DAC_IRQHandler(void) {
-    /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
+void TIM6_DAC_IRQHandler(void)
+{
+  /* USER CODE BEGIN TIM6_DAC_IRQn 0 */
     RefreshData();
-    /* USER CODE END TIM6_DAC_IRQn 0 */
-    HAL_TIM_IRQHandler(&htim6);
-    /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
+  /* USER CODE END TIM6_DAC_IRQn 0 */
+  HAL_TIM_IRQHandler(&htim6);
+  /* USER CODE BEGIN TIM6_DAC_IRQn 1 */
 
-    /* USER CODE END TIM6_DAC_IRQn 1 */
+  /* USER CODE END TIM6_DAC_IRQn 1 */
 }
 
 /* USER CODE BEGIN 1 */
