@@ -89,11 +89,11 @@ __attribute__((weak)) int _write(int file, char *ptr, int len)
   return len;
 }
 
-int _close(int file)
-{
-  (void)file;
-  return -1;
-}
+// int _close(int file)
+// {
+//   (void)file;
+//   return -1;
+// }
 
 
 int _fstat(int file, struct stat *st)

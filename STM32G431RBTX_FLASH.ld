@@ -62,6 +62,7 @@ SECTIONS
   /* The program code and other data into "FLASH" Rom type memory */
   .text :
   {
+    _stext = .;
     . = ALIGN(4);
     *(.text)           /* .text sections (code) */
     *(.text*)          /* .text* sections (code) */
@@ -174,7 +175,7 @@ SECTIONS
     . = . + _Min_Stack_Size;
     . = ALIGN(8);
   } >RAM
-
+  _sstack = .;
   /* Remove information from the compiler libraries */
   /DISCARD/ :
   {
