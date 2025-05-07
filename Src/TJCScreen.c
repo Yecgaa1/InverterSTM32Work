@@ -25,7 +25,8 @@ void TJCSendValue(char *name, int value) {
 }
 
 void TJCSendTxt(char *name, char *value) {
-    char tmp[40]={0};
+    char tmp[100]={0};
+    printf("%s %s\r\n",name,value);
     sprintf(tmp, "%s.txt=\"%s\"", name, value);
     HAL_UART_Transmit(gHuart, (uint8_t *) tmp, strlen(tmp), 255);
     TJCSendEnd();

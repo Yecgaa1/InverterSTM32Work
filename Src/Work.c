@@ -16,6 +16,7 @@ extern char rec_DCDC[100];
 extern int recLen_ACDC;
 extern char rec_ACDC[100];
 extern float now_v;
+extern uint8_t WorkState;
 void TurnON_OUTPUT() {
     if (isAllowOutput == 1) {
         return;
@@ -55,7 +56,7 @@ void TurnON() {
     while (initing_ACDC || initing_DCDC) {
     }
 
-    if (now_v < 100) {
+    if (now_v < 180) {
         //事实上就是没市电
         TJCSendTxt("error", "正常运行（市电未接入）");
     } else {
@@ -105,7 +106,7 @@ void Restart(enum RestartReason reason) {
     HAL_GPIO_WritePin(POWERON_SWITCH_GPIO_Port,POWERON_SWITCH_Pin, GPIO_PIN_RESET);
 
     isOn = 0;
-
+    HAL_Delay(2000);
     //避免显示开机中
     __HAL_UART_ENABLE_IT(&huart1, UART_IT_IDLE);
     HAL_UART_Receive_DMA(&huart1, rec_ACDC, recLen_ACDC);
@@ -137,11 +138,27 @@ void RefreshData() {
         TJCSendTxt("V", "-");
         TJCSendTxt("P", "-");
     } else {
-        char tmp[20] = {0};
+        char tmp[100] = {0};
+        if (WorkState==1) {
+            //上电前接管
+            if (now_v < 180) {
+                //事实上就是没市电
+                TJCSendTxt("error", "正常运行（市电未接入）");
+                TJCSendTxt("V", "0V");
+            } else {
+                TJCSendTxt("error", "正常运行");
+                sprintf(tmp, "%.0fV", now_v);
+                TJCSendTxt("V", tmp);
+            }
+        }
+        else {
+            sprintf(tmp, "%dV", V);
+            TJCSendTxt("V", tmp);
+        }
+
         sprintf(tmp, "%d%%", SOC);
         TJCSendTxt("soc", tmp);
-        sprintf(tmp, "%dV", V);
-        TJCSendTxt("V", tmp);
+
         sprintf(tmp, "%dW", P);
         TJCSendTxt("P", tmp);
     }

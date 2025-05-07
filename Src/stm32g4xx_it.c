@@ -244,7 +244,7 @@ void NMI_Handler(void)
 // void HardFault_Handler(void)
 // {
 //   /* USER CODE BEGIN HardFault_IRQn 0 */
-// //
+// // //
 //   /* USER CODE END HardFault_IRQn 0 */
 //   while (1)
 //   {
@@ -459,7 +459,8 @@ void USART1_IRQHandler(void)
                 //根据模式区分显示内容
                 if (INV_PFC_Mode_Select == 0) //待机
                 {
-                    P = V = 0;
+                    P = 0;
+                    V = VACIN_RMS_Val_Fir;
                 } else if (INV_PFC_Mode_Select == 1) //放电
                 {
                     P = VACOUT_ActivePower;
