@@ -16,7 +16,7 @@ extern char rec_DCDC[100];
 extern int recLen_ACDC;
 extern char rec_ACDC[100];
 extern float now_v;
-extern uint8_t WorkState;
+extern uint8_t WorkState, WantWorkState;
 void TurnON_OUTPUT() {
     if (isAllowOutput == 1) {
         return;
@@ -139,19 +139,20 @@ void RefreshData() {
         TJCSendTxt("P", "-");
     } else {
         char tmp[100] = {0};
-        if (WorkState==1) {
+        if (WorkState == 1) {
             //上电前接管
-            if (now_v < 180) {
-                //事实上就是没市电
-                TJCSendTxt("error", "正常运行（市电未接入）");
-                TJCSendTxt("V", "0V");
-            } else {
-                TJCSendTxt("error", "正常运行");
-                sprintf(tmp, "%.0fV", now_v);
-                TJCSendTxt("V", tmp);
+            if (WantWorkState == 1) {
+                if (now_v < 180) {
+                    //事实上就是没市电
+                    TJCSendTxt("error", "正常运行（市电未接入）");
+                    TJCSendTxt("V", "0V");
+                } else {
+                    TJCSendTxt("error", "正常运行");
+                    sprintf(tmp, "%.0fV", now_v);
+                    TJCSendTxt("V", tmp);
+                }
             }
-        }
-        else {
+        } else {
             sprintf(tmp, "%dV", V);
             TJCSendTxt("V", tmp);
         }
