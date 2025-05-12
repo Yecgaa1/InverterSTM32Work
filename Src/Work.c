@@ -9,8 +9,8 @@
 #include "stm32g4xx.h"
 #include "TJCScreen.h"
 #include "usart.h"
-uint8_t isAllowOutput = 0;
-uint8_t isOn = 0;
+uint8_t volatile isAllowOutput = 0;
+uint8_t volatile isOn = 0;
 extern int recLen_DCDC;
 extern char rec_DCDC[100];
 extern int recLen_ACDC;
@@ -99,7 +99,8 @@ void Restart(enum RestartReason reason) {
     __HAL_UART_DISABLE_IT(&huart3, UART_IT_IDLE);
     TurnOFF_OUTPUT();
 
-    HAL_GPIO_WritePin(AC_OUTPUT_CTRL_GPIO_Port, AC_OUTPUT_CTRL_Pin, GPIO_PIN_RESET); //关闭市电输出
+    HAL_GPIO_WritePin(AC_OUTPUT_CTRL_GPIO_Port, AC_OUTPUT_CTRL_Pin, GPIO_PIN_RESET); //先关闭市电输出
+    HAL_Delay(2000);
 
     HAL_GPIO_WritePin(POWERON_SWITCH_GPIO_Port,POWERON_SWITCH_Pin, GPIO_PIN_SET);
     HAL_Delay(4000);

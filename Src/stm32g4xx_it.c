@@ -478,8 +478,8 @@ void USART1_IRQHandler(void)
                     if (errorCode != 13) {
                         sprintf(ErrorNote, "%s", description);
                         WantWorkState = WorkState = 4;
-                        // TJCSendTxt("state", "故障");
-                        // TJCSendTxt("error", ErrorNote);
+                        TJCSendTxt("state", "故障");
+                        TJCSendTxt("error", ErrorNote);
                         HAL_GPIO_WritePin(AC_OUTPUT_CTRL_GPIO_Port, AC_OUTPUT_CTRL_Pin, GPIO_PIN_RESET); //关闭市电输出
                     }
                 } else {
@@ -525,8 +525,8 @@ void USART3_IRQHandler(void)
                     if (errorCode != 15) {
                         sprintf(ErrorNote, "%s", description);
                         WantWorkState = WorkState = 4;
-                        // TJCSendTxt("state", "故障");
-                        // TJCSendTxt("error", ErrorNote);
+                        TJCSendTxt("state", "故障");
+                        TJCSendTxt("error", ErrorNote);
                         HAL_GPIO_WritePin(AC_OUTPUT_CTRL_GPIO_Port, AC_OUTPUT_CTRL_Pin, GPIO_PIN_RESET); //关闭市电输出
                     }
                 } else {
