@@ -133,7 +133,7 @@ int main(void) {
         //更新市电电压
         HAL_Delay(50);
         now_v = GetAC_V();
-        printf("%f\r\n",now_v);
+        printf("%f\r\n", now_v);
         //状态转换
         if (WantWorkState != WorkState) {
             if (WorkState == 0) {

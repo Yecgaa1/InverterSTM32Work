@@ -18,14 +18,14 @@ void TJCSendEnd() {
 }
 
 void TJCSendValue(char *name, int value) {
-    char tmp[30]={0};
+    char tmp[30] = {0};
     sprintf(tmp, "%s.val=%d", name, value);
     HAL_UART_Transmit(gHuart, (uint8_t *) tmp, strlen(tmp), 255);
     TJCSendEnd();
 }
 
 void TJCSendTxt(char *name, char *value) {
-    char tmp[100]={0};
+    char tmp[100] = {0};
     // printf("%s %s\r\n",name,value);
     sprintf(tmp, "%s.txt=\"%s\"", name, value);
     HAL_UART_Transmit(gHuart, (uint8_t *) tmp, strlen(tmp), 255);
@@ -33,7 +33,7 @@ void TJCSendTxt(char *name, char *value) {
 }
 
 void TJCSendAnyProperty(char *object_name, char *property, char *value) {
-    char tmp[30]={0};
+    char tmp[30] = {0};
     sprintf(tmp, "%s.%s=%s", object_name, property, value);
     HAL_UART_Transmit(gHuart, (uint8_t *) tmp, strlen(tmp), 255);
     TJCSendEnd();
@@ -44,7 +44,7 @@ void TJCSendAny(char *any) {
     TJCSendEnd();
 }
 void TJCSendTxtWithFloat(char *name, const float value) {
-    char tmp[30]={0};
+    char tmp[30] = {0};
     sprintf(tmp, "%s.txt=\"%.02f\"", name, value);
     HAL_UART_Transmit(gHuart, (uint8_t *) tmp, strlen(tmp), 255);
     TJCSendEnd();

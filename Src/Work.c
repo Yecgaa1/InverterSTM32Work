@@ -157,10 +157,9 @@ void RefreshData() {
             sprintf(tmp, "%dV", V);
             TJCSendTxt("V", tmp);
         }
-        if (WorkState==2) {
+        if (WorkState == 2) {
             sprintf(tmp, "%d%%", fakeSOC);
-        }
-        else {
+        } else {
             sprintf(tmp, "%d%%", SOC);
         }
         TJCSendTxt("soc", tmp);

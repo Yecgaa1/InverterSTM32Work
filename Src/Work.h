@@ -10,7 +10,7 @@ enum RestartReason {
     ExitError = 2
 };
 extern volatile uint8_t initing_DCDC, initing_ACDC;
-extern int V, P, SOC,fakeSOC;
+extern int V, P, SOC, fakeSOC;
 void TurnON();
 void TurnOFF();
 void TurnON_OUTPUT();
