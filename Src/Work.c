@@ -56,11 +56,11 @@ void TurnON() {
     while (initing_ACDC || initing_DCDC) {
     }
 
-    if (now_v < 180) {
+    if (now_v < 100) {
         //事实上就是没市电
-        TJCSendTxt("error", "正常运行（市电未接入）");
+        TJCSendTxt("error", "待机中（市电未接入）");
     } else {
-        TJCSendTxt("error", "正常运行");
+        TJCSendTxt("error", "待机中（市电已接入）");
     }
 
     isOn = 1;
@@ -125,9 +125,9 @@ void Restart(enum RestartReason reason) {
 
     if (now_v < 100) {
         //事实上就是没市电
-        TJCSendTxt("error", "正常运行（市电未接入）");
+        TJCSendTxt("error", "待机中（市电未接入）");
     } else {
-        TJCSendTxt("error", "正常运行");
+        TJCSendTxt("error", "待机中（市电已接入）");
     }
 
     isOn = 1;
@@ -145,10 +145,10 @@ void RefreshData() {
             if (WantWorkState == 1) {
                 if (now_v < 180) {
                     //事实上就是没市电
-                    TJCSendTxt("error", "正常运行（市电未接入）");
+                    TJCSendTxt("error", "待机中（市电未接入）");
                     TJCSendTxt("V", "0V");
                 } else {
-                    TJCSendTxt("error", "正常运行");
+                    TJCSendTxt("error", "待机中（市电已接入）");
                     sprintf(tmp, "%.0fV", now_v);
                     TJCSendTxt("V", tmp);
                 }

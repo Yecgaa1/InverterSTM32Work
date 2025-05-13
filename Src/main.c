@@ -162,6 +162,7 @@ int main(void) {
                         HAL_Delay(1000);
                         TurnON_OUTPUT(); //开启放电输出
                         TJCSendTxt("state", "电压治理模式");
+                        TJCSendTxt("error","正常运行（请勿移除市电）");
                         WorkState = 2;
                     } else {
                         //市电条件不满足
@@ -180,6 +181,7 @@ int main(void) {
                         TJCSendTxt("state", "应急放电模式");
                         TJCSendTxt("t1", "输出电压");
                         TJCSendTxt("type", "输出功率");
+                        TJCSendTxt("error","正常运行（请勿接入市电）");
                         WorkState = 3;
                     } else {
                         //市电条件不满足
