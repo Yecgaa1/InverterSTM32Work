@@ -80,6 +80,7 @@ bool is_emergency_output = false;
 extern char ErrorNote[64];
 extern uint8_t WorkState, WantWorkState;
 int V = 0, P = 0, SOC = 0;
+int fakeSOC=0;
 /**
  * 解析DCDC系统保护标志，获取错误代码和简短描述
  * @param errorCode 错误码，等于System_Protect_Flag_BITS的所有位
@@ -459,14 +460,23 @@ void USART1_IRQHandler(void)
                 //根据模式区分显示内容
                 if (INV_PFC_Mode_Select == 0) //待机
                 {
+                    fakeSOC=SOC;
                     P = 0;
                     V = VACIN_RMS_Val_Fir;
                 } else if (INV_PFC_Mode_Select == 1) //放电
                 {
+                    //此时soc偏小
+                    fakeSOC=SOC+6;
                     P = VACOUT_ActivePower;
                     V = VACIN_RMS_Val_Fir;
                 } else //充电
                 {
+                    if (VACIN_PFC_Power<400) {
+                        SOC=fakeSOC;
+                    }
+                    else {
+                        fakeSOC=SOC-6;
+                    }
                     P = VACIN_PFC_Power;
                     V = VACIN_RMS_Val_Fir;
                 }

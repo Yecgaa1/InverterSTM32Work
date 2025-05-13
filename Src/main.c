@@ -178,6 +178,8 @@ int main(void) {
                         HAL_Delay(1000);
                         TurnON_OUTPUT(); //开启放电输出
                         TJCSendTxt("state", "应急放电模式");
+                        TJCSendTxt("t1", "输出电压");
+                        TJCSendTxt("type", "输出功率");
                         WorkState = 3;
                     } else {
                         //市电条件不满足
@@ -204,6 +206,8 @@ int main(void) {
             {
                 if (WantWorkState == 1) {
                     //希望进入待机模式
+                    TJCSendTxt("t1", "市电电压");
+                    TJCSendTxt("type", "并网功率");
                     Restart(Normal);
                     TJCSendTxt("state", "待机");
                     WorkState = 1;
