@@ -157,10 +157,12 @@ void RefreshData() {
             sprintf(tmp, "%dV", V);
             TJCSendTxt("V", tmp);
         }
+
         if (WorkState == 2) {
-            sprintf(tmp, "%d%%", fakeSOC);
+            sprintf(tmp, "%.1f%%", BatteryVoltage);
         } else {
-            sprintf(tmp, "%d%%", SOC);
+            sprintf(tmp, "   %.1fV\r\nSOC:%.0f%%", BatteryVoltage,
+                    (BatteryVoltage - 14.f * 3.07f) / (14.f * 3.85f - 14.f * 3.07f) * 100);
         }
         TJCSendTxt("soc", tmp);
 
