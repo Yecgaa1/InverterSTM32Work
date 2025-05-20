@@ -158,8 +158,8 @@ void RefreshData() {
             TJCSendTxt("V", tmp);
         }
 
-        if (WorkState == 2) {
-            sprintf(tmp, "%.1f%%", BatteryVoltage);
+        if (WorkState == 2 || WorkState == 3) {
+            sprintf(tmp, "%.1fV", BatteryVoltage);
         } else {
             sprintf(tmp, "   %.1fV\r\nSOC:%.0f%%", BatteryVoltage,
                     (BatteryVoltage - 14.f * 3.07f) / (14.f * 3.85f - 14.f * 3.07f) * 100);
