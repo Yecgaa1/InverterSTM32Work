@@ -159,6 +159,7 @@ int main(void) {
                         //市电条件满足
                         HAL_GPIO_WritePin(AC_FLOW_CTRL_GPIO_Port, AC_FLOW_CTRL_Pin, GPIO_PIN_RESET); //向市电方向
                         HAL_GPIO_WritePin(AC_OUTPUT_CTRL_GPIO_Port, AC_OUTPUT_CTRL_Pin, GPIO_PIN_SET); //打开市电输出
+                        HAL_GPIO_WritePin(FAN_CTRL_GPIO_Port, FAN_CTRL_Pin, GPIO_PIN_SET); //打开风扇
                         HAL_Delay(1000);
                         TurnON_OUTPUT(); //开启放电输出
                         TJCSendTxt("state", "电压治理模式");
@@ -176,6 +177,7 @@ int main(void) {
                     if (now_v < 30) {
                         HAL_GPIO_WritePin(AC_FLOW_CTRL_GPIO_Port, AC_FLOW_CTRL_Pin, GPIO_PIN_SET); //向插头方向
                         HAL_GPIO_WritePin(AC_OUTPUT_CTRL_GPIO_Port, AC_OUTPUT_CTRL_Pin, GPIO_PIN_SET); //打开市电输出
+                        HAL_GPIO_WritePin(FAN_CTRL_GPIO_Port, FAN_CTRL_Pin, GPIO_PIN_SET); //打开风扇
                         HAL_Delay(1000);
                         TurnON_OUTPUT(); //开启放电输出
                         TJCSendTxt("state", "应急放电模式");
@@ -198,6 +200,7 @@ int main(void) {
                 if (WantWorkState == 1) {
                     //希望进入待机模式
                     Restart(Normal);
+                    HAL_GPIO_WritePin(FAN_CTRL_GPIO_Port, FAN_CTRL_Pin, GPIO_PIN_RESET); //关闭风扇
                     TJCSendTxt("state", "待机");
                     WorkState = 1;
                 } else {
@@ -211,6 +214,7 @@ int main(void) {
                     TJCSendTxt("t1", "市电电压");
                     TJCSendTxt("type", "并网功率");
                     Restart(Normal);
+                    HAL_GPIO_WritePin(FAN_CTRL_GPIO_Port, FAN_CTRL_Pin, GPIO_PIN_RESET); //关闭风扇
                     TJCSendTxt("state", "待机");
                     WorkState = 1;
                 } else {
@@ -222,6 +226,7 @@ int main(void) {
                 if (WantWorkState == 1) {
                     //希望进入待机模式
                     Restart(ExitError);
+                    HAL_GPIO_WritePin(FAN_CTRL_GPIO_Port, FAN_CTRL_Pin, GPIO_PIN_RESET); //关闭风扇
                     TJCSendTxt("state", "待机");
                     WorkState = 1;
                 } else {
